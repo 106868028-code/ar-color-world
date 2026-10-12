@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AR COLOR WORLD</title>
+
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #fff3f8;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin: 16px 8px;
+    }
+
+    p {
+      padding: 0 12px;
+    }
+
+    #start {
+      padding: 12px 24px;
+      border: 0;
+      border-radius: 12px;
+      background: #d65db1;
+      color: white;
+      font-size: 17px;
+    }
+
+    #status {
+      padding: 12px;
+    }
+
+    #ar-container {
+      width: 100%;
+      height: 65vh;
+      min-height: 350px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #ar-container a-scene {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🐱 AR COLOR WORLD 🎨</h1>
+  <p>ส่องกล้องไปที่ภาพแมวบนกระดาษ</p>
+
+  <button id="start">เริ่มเล่น AR</button>
+  <div id="status">กดเริ่มเล่นเพื่อเปิดกล้อง</div>
+
+  <div id="ar-container">
+    <a-scene
+      mindar-image="
+        imageTargetSrc: ./targets.mind;
+        autoStart: false;
+        uiLoading: yes;
+        uiScanning: yes;
+        uiError: yes"
+      embedded
+      color-space="sRGB"
+      renderer="colorManagement: true, physicallyCorrectLights: true"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false">
+
+      <a-assets>
+        <a-asset-item
+          id="catModel"
+          src="./scene%209.glb">
+        </a-asset-item>
+      </a-assets>
+
+      <a-camera
+        position="0 0 0"
+        look-controls="enabled: false">
+      </a-camera>
+
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-gltf-model
+          src="#catModel"
+          position="0 0 0.1"
+          rotation="0 0 0"
+          scale="0.3 0.3 0.3">
+        </a-gltf-model>
+      </a-entity>
+
+    </a-scene>
+  </div>
+
+  <script>
+    const scene = document.querySelector("a-scene");
+    const startButton = document.querySelector("#start");
+    const status = document.querySelector("#status");
+
+    startButton.addEventListener("click", async () => {
+      try {
+        status.textContent = "กำลังเปิดกล้อง...";
+        await scene.systems["mindar-image-system"].start();
+        status.textContent =
+          "เปิดกล้องแล้ว ให้นำกล้องส่องภาพแมวบนกระดาษ";
+      } catch (error) {
+        console.error(error);
+        status.textContent =
+          "เปิดกล้องไม่สำเร็จ กรุณาอนุญาตกล้องและใช้ HTTPS";
+      }
+    });
+
+    scene.addEventListener("arReady", () => {
+      status.textContent = "พร้อมแล้ว! ส่องกล้องไปที่ภาพแมว";
+    });
+
+    scene.addEventListener("targetFound", () => {
+      status.textContent = "พบภาพแมวแล้ว!";
+    });
+
+    scene.addEventListener("targetLost", () => {
+      status.textContent = "ไม่พบภาพแมว กรุณาจัดกล้องให้ตรงกระดาษ";
+    });
+  </script>
+</body>
+</html>
